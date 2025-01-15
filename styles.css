@@ -8,10 +8,10 @@ canvas {
     border: 1px solid black;
 }
 div {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     width: 100%;
-    align-items: center;
-    justify-content: center;
+    text-align: end;
 }
 div label {
     font-size: 1.2rem;
