@@ -19,7 +19,57 @@ let elasticity = 0.8;
 let airDrag = 0.001;
 const density = 0.1;
 const colorArray = ["#B1F0F7", "#81BFDA", "#F5F0CD", "#FADA7A"];
+// Sliders
+const gravitySlider = document.querySelector("#gravity");
+gravitySlider.addEventListener("change", (e) => {
+    gravity = parseFloat(e.target.value);
+});
+const airDragSlider = document.querySelector("#airDrag");
+airDragSlider.addEventListener("change", (e) => {
+    airDrag = parseFloat(e.target.value);
+});
+const elasticitySlider = document.querySelector("#elasticity");
+elasticitySlider.addEventListener("change", (e) => {
+    elasticity = parseFloat(e.target.value);
+    console.log(elasticity);
+});
 
+//Setting up Utility functions
+
+function velocityAlongAngle(velocity, angle) {
+    return (Math.cos(angle) * velocity.x + Math.sin(angle) * velocity.y);
+}
+
+function distance(x1, y1, x2, y2) {
+    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+}
+function checkCircleCollision(circle1, circle2) {
+    let dist = distance(circle1.x, circle1.y, circle2.x, circle2.y);
+    return dist < (circle1.radius + circle2.radius);
+}
+function randomInRange(low, high) {
+    let x = Math.random() * (low + high);
+    if (x < low || x > high) return (low + high) / 2;
+    return x;
+}
+// Physics functions
+function addAirDrag(circle) {
+    if ((circle.velocity.y > 0)) {
+        circle.velocity.y -= airDrag;
+    } else {
+        circle.velocity.y += airDrag;
+    }
+    if (circle.velocity.x > 0) {
+        circle.velocity.x -= airDrag;
+    } else {
+        circle.velocity.x += airDrag;
+    }
+}
+
+function addGravity(circle) {
+    circle.velocity.y += gravity;
+}
+//Collision handling functions
 function boxCollisionHandling(circle) {
     if (circle.x + circle.radius + circle.velocity.x >= CANVAS_WIDTH || circle.x - circle.radius <= 0) {
         circle.velocity.x = -(circle.velocity.x * elasticity);
@@ -39,9 +89,6 @@ function boxCollisionHandling(circle) {
         }
     }
 }
-function velocityAlongAngle(velocity, angle) {
-    return (Math.cos(angle) * velocity.x + Math.sin(angle) * velocity.y);
-}
 // Changing linear momentum consservation along axes to linear momentum along axis of collision 
 function velocityAfterCollision(circle1, circle2) {
     const dx = circle2.x - circle1.x;
@@ -56,7 +103,7 @@ function velocityAfterCollision(circle1, circle2) {
 
     const v1t = velocityAlongAngle(v1, angle - Math.PI / 2);
     const v2t = velocityAlongAngle(v2, angle - Math.PI / 2);
-    // Calculated by assuming elastic collision
+    // Calculated by assuming elastic collision (to be changed to inelastic collisions later)
     const v1nFinal = ((circle1.mass - circle2.mass) * v1n + 2 * circle2.mass * v2n) / (circle1.mass + circle2.mass);
     const v2nFinal = ((circle2.mass - circle1.mass) * v2n + 2 * circle1.mass * v1n) / (circle1.mass + circle2.mass);
 
@@ -85,11 +132,9 @@ function velocityAfterCollision(circle1, circle2) {
         circle2.y += Math.sin(angle) * pushDistance;
     }
 }
-
 function ballCollisionHandling(circles) {
     for (let i = 0; i < circles.length; i++) {
         for (let j = i + 1; j < circles.length; j++) {
-            if (i === j) continue;
             if (checkCircleCollision(circles[i], circles[j])) {
                 velocityAfterCollision(circles[i], circles[j]);
             }
@@ -97,35 +142,6 @@ function ballCollisionHandling(circles) {
     }
 }
 
-function distance(x1, y1, x2, y2) {
-    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-}
-function checkCircleCollision(circle1, circle2) {
-    let dist = distance(circle1.x, circle1.y, circle2.x, circle2.y);
-    return dist < (circle1.radius + circle2.radius);
-}
-function randomInRange(low, high) {
-    let x = Math.random() * (low + high);
-    if (x < low || x > high) return (low + high) / 2;
-    return x;
-}
-
-function addAirDrag(circle) {
-    if ((circle.velocity.y > 0)) {
-        circle.velocity.y -= airDrag;
-    } else {
-        circle.velocity.y += airDrag;
-    }
-    if (circle.velocity.x > 0) {
-        circle.velocity.x -= airDrag;
-    } else {
-        circle.velocity.x += airDrag;
-    }
-}
-
-function addGravity(circle) {
-    circle.velocity.y += gravity;
-}
 class Circle {
     constructor(x, y, radius, dx, dy, color) {
         this.x = x;
@@ -169,6 +185,7 @@ function init() {
     }
     return circles;
 }
+
 function animate() {
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     for (let i = 0; i < circles.length; i++) {
@@ -183,17 +200,3 @@ function animate() {
 
 let circles = init();
 animate();
-// Sliders
-const gravitySlider = document.querySelector("#gravity");
-gravitySlider.addEventListener("change", (e) => {
-    gravity = parseFloat(e.target.value);
-});
-const airDragSlider = document.querySelector("#airDrag");
-airDragSlider.addEventListener("change", (e) => {
-    airDrag = parseFloat(e.target.value);
-});
-const elasticitySlider = document.querySelector("#elasticity");
-elasticitySlider.addEventListener("change", (e) => {
-    elasticity = parseFloat(e.target.value);
-    console.log(elasticity);
-});
