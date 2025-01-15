@@ -7,3 +7,15 @@ body {
 canvas {
     border: 1px solid black;
 }
+div {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}
+div label {
+    font-size: 1.2rem;
+}
+div input {
+    width: 40%;
+}

@@ -1,28 +1,29 @@
 console.log("Connected");
 const canvas = document.querySelector('canvas');
 
-let CANVAS_WIDTH = window.innerWidth;
-let CANVAS_HEIGHT = window.innerHeight;
+let CANVAS_WIDTH = window.innerWidth / 1.1;
+let CANVAS_HEIGHT = window.innerHeight / 1.2;
 
 canvas.width = CANVAS_WIDTH;
 canvas.height = CANVAS_HEIGHT;
 window.addEventListener('resize', () => {
-    CANVAS_WIDTH = window.innerWidth;
-    CANVAS_HEIGHT = window.innerHeight;
+    CANVAS_WIDTH = window.innerWidth / 1.1;
+    CANVAS_HEIGHT = window.innerHeight / 1.2;
     canvas.width = CANVAS_WIDTH;
     canvas.height = CANVAS_HEIGHT;
     circles = init();
 });
 const ctx = canvas.getContext('2d');
-const gravity = 0.005;
-const elasticity = 0.8;
-const airDrag = 0.001;
+let gravity = 0.005;
+let elasticity = 0.8;
+let airDrag = 0.001;
 const density = 0.1;
 const colorArray = ["#B1F0F7", "#81BFDA", "#F5F0CD", "#FADA7A"];
 
 function boxCollisionHandling(circle) {
     if (circle.x + circle.radius + circle.velocity.x >= CANVAS_WIDTH || circle.x - circle.radius <= 0) {
         circle.velocity.x = -(circle.velocity.x * elasticity);
+        // to prevent tunneling and overlays... check yt for refreshing
         if (circle.x + circle.radius >= CANVAS_WIDTH) {
             circle.x = CANVAS_WIDTH - circle.radius;
         } else if (circle.x - circle.radius <= 0) {
@@ -38,6 +39,7 @@ function boxCollisionHandling(circle) {
         }
     }
 }
+
 function velocityAfterCollision(circle1, circle2) {
     let v1x = ((circle1.mass - circle2.mass) * circle1.velocity.x + 2 * circle2.mass * circle2.velocity.x) / (circle1.mass + circle2.mass);
     let v1y = ((circle1.mass - circle2.mass) * circle1.velocity.y + 2 * circle2.mass * circle2.velocity.y) / (circle1.mass + circle2.mass);
@@ -159,3 +161,17 @@ function animate() {
 
 let circles = init();
 animate();
+// Sliders
+const gravitySlider = document.querySelector("#gravity");
+gravitySlider.addEventListener("change", (e) => {
+    gravity = parseFloat(e.target.value);
+});
+const airDragSlider = document.querySelector("#airDrag");
+airDragSlider.addEventListener("change", (e) => {
+    airDrag = parseFloat(e.target.value);
+});
+const elasticitySlider = document.querySelector("#elasticity");
+elasticitySlider.addEventListener("change", (e) => {
+    elasticity = parseFloat(e.target.value);
+    console.log(elasticity);
+});

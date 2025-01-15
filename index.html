@@ -9,6 +9,18 @@
 </head>
 
 <body>
+    <div>
+        <label for="gravity">Gravity</label>
+        <input type="range" name="gravity" id="gravity" min="0" max="0.1" step="0.001">
+    </div>
+    <div>
+        <label for="airDrag">Air Drag</label>
+        <input type="range" name="airDrag" id="airDrag" min="0" max="0.001" step="0.0001">
+    </div>
+    <div>
+        <label for="elasticity">Elasticity of Walls</label>
+        <input type="range" name="elasticity" id="elasticity" min="0" max="1" step="0.01">
+    </div>
     <canvas></canvas>
     <script src="app.js"></script>
 </body>
