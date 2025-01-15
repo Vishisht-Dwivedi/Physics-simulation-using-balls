@@ -39,26 +39,48 @@ function boxCollisionHandling(circle) {
         }
     }
 }
-
+function velocityAlongAngle(velocity, angle) {
+    return (Math.cos(angle) * velocity.x + Math.sin(angle) * velocity.y);
+}
+// Changing linear momentum consservation along axes to linear momentum along axis of collision 
 function velocityAfterCollision(circle1, circle2) {
-    let v1x = ((circle1.mass - circle2.mass) * circle1.velocity.x + 2 * circle2.mass * circle2.velocity.x) / (circle1.mass + circle2.mass);
-    let v1y = ((circle1.mass - circle2.mass) * circle1.velocity.y + 2 * circle2.mass * circle2.velocity.y) / (circle1.mass + circle2.mass);
+    const dx = circle2.x - circle1.x;
+    const dy = circle2.y - circle1.y;
+    const angle = Math.atan2(dy, dx);
 
-    let v2x = ((circle2.mass - circle1.mass) * circle2.velocity.x + 2 * circle1.mass * circle1.velocity.x) / (circle1.mass + circle2.mass);
-    let v2y = ((circle2.mass - circle1.mass) * circle2.velocity.y + 2 * circle1.mass * circle1.velocity.y) / (circle1.mass + circle2.mass);
+    const v1 = { x: circle1.velocity.x, y: circle1.velocity.y };
+    const v2 = { x: circle2.velocity.x, y: circle2.velocity.y };
 
-    circle1.velocity.x = v1x;
-    circle1.velocity.y = v1y;
-    circle2.velocity.x = v2x;
-    circle2.velocity.y = v2y;
-    //Code from the web to fix stickyness and tunneling
+    const v1n = velocityAlongAngle(v1, angle);
+    const v2n = velocityAlongAngle(v2, angle);
+
+    const v1t = velocityAlongAngle(v1, angle - Math.PI / 2);
+    const v2t = velocityAlongAngle(v2, angle - Math.PI / 2);
+    // Calculated by assuming elastic collision
+    const v1nFinal = ((circle1.mass - circle2.mass) * v1n + 2 * circle2.mass * v2n) / (circle1.mass + circle2.mass);
+    const v2nFinal = ((circle2.mass - circle1.mass) * v2n + 2 * circle1.mass * v1n) / (circle1.mass + circle2.mass);
+
+    const v1Final = {
+        x: v1nFinal * Math.cos(angle) + v1t * Math.cos(angle - Math.PI / 2),
+        y: v1nFinal * Math.sin(angle) + v1t * Math.sin(angle - Math.PI / 2)
+    };
+
+    const v2Final = {
+        x: v2nFinal * Math.cos(angle) + v2t * Math.cos(angle - Math.PI / 2),
+        y: v2nFinal * Math.sin(angle) + v2t * Math.sin(angle - Math.PI / 2)
+    };
+
+    circle1.velocity.x = v1Final.x;
+    circle1.velocity.y = v1Final.y;
+    circle2.velocity.x = v2Final.x;
+    circle2.velocity.y = v2Final.y;
+
     const overlap = circle1.radius + circle2.radius - distance(circle1.x, circle1.y, circle2.x, circle2.y);
-    if (overlap > 0) {
-        let angle = Math.atan2(circle2.y - circle1.y, circle2.x - circle1.x);
-        let pushDistance = overlap / 2;
+    // DONOT REMOVE BELOW... PREVENTS TUNNELING AND CIRCLES GETTING STUCK
+    if (overlap > 0.05) {
+        const pushDistance = overlap / 2;
         circle1.x -= Math.cos(angle) * pushDistance;
         circle1.y -= Math.sin(angle) * pushDistance;
-
         circle2.x += Math.cos(angle) * pushDistance;
         circle2.y += Math.sin(angle) * pushDistance;
     }
