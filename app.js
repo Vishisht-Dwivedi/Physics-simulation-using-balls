@@ -11,6 +11,7 @@ window.addEventListener('resize', () => {
     CANVAS_HEIGHT = window.innerHeight;
     canvas.width = CANVAS_WIDTH;
     canvas.height = CANVAS_HEIGHT;
+    circles = init();
 });
 const ctx = canvas.getContext('2d');
 const gravity = 0.005;
@@ -128,18 +129,22 @@ class Circle {
         }
     }
 }
-const circles = [];
-for (let i = 0; i < 200; i++) {
-    let dx = (Math.random() - 0.5) * 2;
-    let dy = (Math.random() - 0.5) * 2;
-    let radius = randomInRange(10, 20);
-    let x = randomInRange(2 * radius, CANVAS_WIDTH - 2 * radius);
-    let y = randomInRange(2 * radius, CANVAS_HEIGHT - 2 * radius);
-    let color = colorArray[Math.floor(Math.random() * colorArray.length)];
-    const circle = new Circle(x, y, radius, dx, dy, color);
-    circles.push(circle);
-}
 
+
+function init() {
+    const circles = [];
+    for (let i = 0; i < 200; i++) {
+        let dx = (Math.random() - 0.5) * 2;
+        let dy = (Math.random() - 0.5) * 2;
+        let radius = randomInRange(0.008 * CANVAS_WIDTH, 0.015 * CANVAS_WIDTH);
+        let x = randomInRange(2 * radius, CANVAS_WIDTH - 2 * radius);
+        let y = randomInRange(2 * radius, CANVAS_HEIGHT - 2 * radius);
+        let color = colorArray[Math.floor(Math.random() * colorArray.length)];
+        const circle = new Circle(x, y, radius, dx, dy, color);
+        circles.push(circle);
+    }
+    return circles;
+}
 function animate() {
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     for (let i = 0; i < circles.length; i++) {
@@ -151,4 +156,6 @@ function animate() {
     ballCollisionHandling(circles);
     requestAnimationFrame(animate);
 }
+
+let circles = init();
 animate();
