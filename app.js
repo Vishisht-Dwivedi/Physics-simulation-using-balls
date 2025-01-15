@@ -106,7 +106,7 @@ class Circle {
     constructor(x, y, radius, dx, dy, color) {
         this.x = x;
         this.y = y;
-        this.mass = density * (4 / 3 * Math.PI * Math.pow(radius, 3));
+        this.mass = density * (Math.PI * Math.pow(radius, 2));
         this.radius = radius;
         this.velocity = {
             x: dx,
