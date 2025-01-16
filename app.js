@@ -6,13 +6,7 @@ let CANVAS_HEIGHT = window.innerHeight / 1.2;
 
 canvas.width = CANVAS_WIDTH;
 canvas.height = CANVAS_HEIGHT;
-window.addEventListener('resize', () => {
-    CANVAS_WIDTH = window.innerWidth / 1.1;
-    CANVAS_HEIGHT = window.innerHeight / 1.2;
-    canvas.width = CANVAS_WIDTH;
-    canvas.height = CANVAS_HEIGHT;
-    circles = init();
-});
+
 const ctx = canvas.getContext('2d');
 let gravity = 0.005;
 let elasticity = 0.8;
@@ -31,7 +25,6 @@ airDragSlider.addEventListener("change", (e) => {
 const elasticitySlider = document.querySelector("#elasticity");
 elasticitySlider.addEventListener("change", (e) => {
     elasticity = parseFloat(e.target.value);
-    console.log(elasticity);
 });
 
 //Setting up Utility functions
@@ -124,7 +117,7 @@ function velocityAfterCollision(circle1, circle2) {
 
     const overlap = circle1.radius + circle2.radius - distance(circle1.x, circle1.y, circle2.x, circle2.y);
     // DONOT REMOVE BELOW... PREVENTS TUNNELING AND CIRCLES GETTING STUCK
-    if (overlap > 0.05) {
+    if (overlap > (circle1.radius > circle2.radius) ? circle2.radius / 2 : circle1.radius / 2) {
         const pushDistance = overlap / 2;
         circle1.x -= Math.cos(angle) * pushDistance;
         circle1.y -= Math.sin(angle) * pushDistance;
@@ -200,3 +193,59 @@ function animate() {
 
 let circles = init();
 animate();
+
+// Mouse event handling
+const clickText = document.querySelector("#clicks");
+const circlesLeft = document.querySelector("#numberOfCircles");
+circlesLeft.innerText = circles.length;
+canvas.addEventListener("click", (e) => {
+    clickText.innerText++;
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    for (let i = 0; i < circles.length; i++) {
+        if (distance(mouseX, mouseY, circles[i].x, circles[i].y) <= circles[i].radius) {
+            circles[i].radius *= 2.5;
+            const toBeRemoved = [i];
+            //code for removing the elements which are touching and are of the same color
+            for (let j = 0; j < circles.length; j++) {
+                if (j === i) continue;
+                if (distance(circles[i].x, circles[i].y, circles[j].x, circles[j].y) <= (circles[i].radius + circles[j].radius)) {
+                    if (circles[i].color == circles[j].color) {
+                        toBeRemoved.push(j);
+                    }
+                }
+            }
+            setTimeout(() => {
+                //added so that after splice the index shift doesnt affect removal
+                toBeRemoved.sort((a, b) => b - a);
+                for (let k = 0; k < toBeRemoved.length; k++) {
+                    circles.splice(toBeRemoved[k], 1);
+                }
+            }, 100);
+        }
+        circlesLeft.innerText = circles.length;
+    }
+    if (circles.length == 0) {
+        alert(`You won in ${clickText.innerText} clicks`);
+    }
+});
+window.addEventListener('resize', () => {
+    CANVAS_WIDTH = window.innerWidth / 1.1;
+    CANVAS_HEIGHT = window.innerHeight / 1.2;
+    canvas.width = CANVAS_WIDTH;
+    canvas.height = CANVAS_HEIGHT;
+    cancelAnimationFrame(animate);
+    circles = init();
+    requestAnimationFrame(animate);
+    circlesLeft.innerText = circles.length;
+    clickText.innerText = 0;
+});
+const resetBtn = document.querySelector("#reset");
+resetBtn.addEventListener("click", () => {
+    cancelAnimationFrame(animate);
+    circles = init();
+    requestAnimationFrame(animate);
+    clickText.innerText = 0;
+    circlesLeft.innerText = circles.length;
+})
